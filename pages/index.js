@@ -1,78 +1,84 @@
-import Image from "next/image";
-import { Geist, Geist_Mono } from "next/font/google";
+import { useState } from "react";
+import BlogCard from "@/components/BlogCard";
+import fs from "fs";
+import path from "path";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+export default function Home({ initialBlogs }) {
+  const [blogs, setBlogs] = useState(initialBlogs);
+  const [search, setSearch] = useState("");
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+  const filtered = blogs.filter(
+    (b) =>
+      b.title.toLowerCase().includes(search.toLowerCase()) ||
+      b.description.toLowerCase().includes(search.toLowerCase())
+  );
 
-export default function Home() {
   return (
-    <div
-      className={`${geistSans.className} ${geistMono.className} flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black`}
-    >
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the index.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="max-w-5xl mx-auto px-6 py-14">
+      {/* Hero */}
+      <div className="mb-14 fade-up">
+        <p className="font-poppins text-xs font-medium tracking-[0.2em] uppercase text-navy/60 mb-3">
+          Open · Free · For Everyone
+        </p>
+        <h1 className="font-milonga text-navy text-5xl sm:text-6xl leading-tight mb-5">
+          Daily<br />Thoughts.
+        </h1>
+        <p className="font-poppins text-gray-500 text-base max-w-md leading-relaxed">
+          A quiet corner of the internet for ideas worth sharing. No account, no noise — just words.
+        </p>
+      </div>
+
+      {/* Divider */}
+      <div className="flex items-center gap-4 mb-10 fade-up fade-up-delay-1">
+        <div className="flex-1 h-px bg-gray-100" />
+        <span className="font-poppins text-xs text-gray-300 tracking-widest uppercase">Latest Posts</span>
+        <div className="flex-1 h-px bg-gray-100" />
+      </div>
+
+      {/* Search */}
+      <div className="mb-10 fade-up fade-up-delay-2">
+        <div className="relative max-w-sm">
+          <svg
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300"
+            fill="none" viewBox="0 0 24 24" stroke="currentColor"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs/pages/getting-started?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search posts..."
+            className="w-full pl-11 pr-4 py-2.5 font-poppins text-sm border border-gray-200 rounded-full focus:outline-none focus:border-navy focus:ring-2 focus:ring-navy/10 transition"
+          />
         </div>
-      </main>
+      </div>
+
+      {/* Blog Grid */}
+      {filtered.length === 0 ? (
+        <div className="text-center py-24 fade-up">
+          <p className="font-prata text-2xl text-gray-300 mb-3">No posts yet.</p>
+          <p className="font-poppins text-sm text-gray-400">Be the first to share a thought.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
+          {filtered.map((blog, i) => (
+            <BlogCard key={blog.id} blog={blog} index={i} />
+          ))}
+        </div>
+      )}
     </div>
   );
+}
+
+export async function getServerSideProps() {
+  const dataFilePath = path.join(process.cwd(), "data", "blog.json");
+  let blogs = [];
+  try {
+    const raw = fs.readFileSync(dataFilePath, "utf-8");
+    blogs = JSON.parse(raw).reverse();
+  } catch {
+    blogs = [];
+  }
+  return { props: { initialBlogs: blogs } };
 }

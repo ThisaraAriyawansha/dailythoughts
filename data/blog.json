@@ -1,23 +1,9 @@
 [
   {
-    "id": "1",
-    "title": "Welcome to DailyThoughts",
-    "date": "2026-03-16",
-    "description": "DailyThoughts is an open platform where anyone can share their ideas, stories, and perspectives. No account needed — just pure expression. Start reading, start writing, start thinking.",
-    "image": "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&auto=format&fit=crop"
-  },
-  {
-    "id": "2",
-    "title": "The Art of Slow Mornings",
+    "id": "1773644988722",
+    "title": "The Future of Artificial Intelligence",
     "date": "2026-03-15",
-    "description": "There is something deeply restorative about a morning spent without urgency. No notifications, no rushing — just coffee, light, and the quiet hum of thought. We have forgotten how to begin slowly.",
-    "image": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&auto=format&fit=crop"
-  },
-  {
-    "id": "3",
-    "title": "Why Minimalism Changes Everything",
-    "date": "2026-03-14",
-    "description": "Minimalism isn't about owning less. It's about making room for what matters. When you remove the noise, you finally hear the signal. Design, life, and thought all benefit from the same principle: subtract until it sings.",
-    "image": "https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?w=800&auto=format&fit=crop"
+    "description": "Artificial Intelligence (AI) is rapidly transforming the way we live and work. From smart assistants to self-driving cars, AI technologies are becoming a part of our daily lives.\n\nModern AI systems can analyze massive amounts of data and make intelligent decisions faster than humans. Businesses are using AI for automation, customer service, fraud detection, and predictive analytics.\n\nIn the future, AI will play an even bigger role in healthcare, education, and transportation. However, ethical considerations and responsible development will be essential to ensure AI benefits society.",
+    "image": "https://cdn.mos.cms.futurecdn.net/DVffQnnibMWmNpx2Wfb5Se.jpg"
   }
 ]
