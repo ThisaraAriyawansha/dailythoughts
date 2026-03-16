@@ -3,6 +3,12 @@ import path from "path";
 
 const dataFilePath = path.join(process.cwd(), "data", "blog.json");
 
+function setCors(res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+}
+
 function readBlogs() {
   try {
     const raw = fs.readFileSync(dataFilePath, "utf-8");
@@ -19,6 +25,13 @@ function writeBlogs(blogs) {
 }
 
 export default function handler(req, res) {
+  setCors(res);
+
+  // Preflight request from browsers
+  if (req.method === "OPTIONS") {
+    return res.status(204).end();
+  }
+
   if (req.method === "GET") {
     const blogs = readBlogs();
     return res.status(200).json([...blogs].reverse());

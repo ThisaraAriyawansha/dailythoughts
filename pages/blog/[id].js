@@ -1,3 +1,4 @@
+import Head from "next/head";
 import Link from "next/link";
 import fs from "fs";
 import path from "path";
@@ -14,7 +15,22 @@ export default function BlogPost({ blog }) {
     );
   }
 
+  const excerpt = blog.description.slice(0, 155).trim();
+
   return (
+    <>
+    <Head>
+      <title>{blog.title} — DailyThoughts</title>
+      <meta name="description" content={excerpt} />
+      <meta property="og:type" content="article" />
+      <meta property="og:title" content={`${blog.title} — DailyThoughts`} />
+      <meta property="og:description" content={excerpt} />
+      {blog.image && <meta property="og:image" content={blog.image} />}
+      <meta name="twitter:card" content={blog.image ? "summary_large_image" : "summary"} />
+      <meta name="twitter:title" content={`${blog.title} — DailyThoughts`} />
+      <meta name="twitter:description" content={excerpt} />
+      {blog.image && <meta name="twitter:image" content={blog.image} />}
+    </Head>
     <div className="max-w-2xl mx-auto px-6 py-14">
       {/* Back */}
       <Link
@@ -79,6 +95,7 @@ export default function BlogPost({ blog }) {
         </Link>
       </div>
     </div>
+    </>
   );
 }
 

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Head from "next/head";
 import BlogCard from "@/components/BlogCard";
 import fs from "fs";
 import path from "path";
@@ -14,6 +15,20 @@ export default function Home({ initialBlogs }) {
   );
 
   return (
+    <>
+    <Head>
+      <title>DailyThoughts — Share Your Thoughts</title>
+      <meta name="description" content="A quiet corner of the internet for ideas worth sharing. No account, no noise — just words. Open platform for everyone." />
+      <meta name="keywords" content="blog, thoughts, writing, open platform, daily thoughts" />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content="DailyThoughts — Share Your Thoughts" />
+      <meta property="og:description" content="A quiet corner of the internet for ideas worth sharing. No account, no noise — just words." />
+      <meta property="og:image" content="/logo_124179-bg_remove.png" />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content="DailyThoughts — Share Your Thoughts" />
+      <meta name="twitter:description" content="A quiet corner of the internet for ideas worth sharing. No account, no noise — just words." />
+      <meta name="twitter:image" content="/logo_124179-bg_remove.png" />
+    </Head>
     <div className="max-w-5xl mx-auto px-6 py-14">
       {/* Hero */}
       <div className="mb-14 fade-up">
@@ -68,6 +83,7 @@ export default function Home({ initialBlogs }) {
         </div>
       )}
     </div>
+    </>
   );
 }
 

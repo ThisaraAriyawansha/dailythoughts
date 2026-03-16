@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
@@ -80,6 +81,12 @@ export default function AddPost() {
   const displayImage = localPreviewUrl || form.image;
 
   return (
+    <>
+    <Head>
+      <title>Write a Post — DailyThoughts</title>
+      <meta name="description" content="Share your thoughts with the world. No account needed. Write and publish a post on DailyThoughts." />
+      <meta name="robots" content="noindex, nofollow" />
+    </Head>
     <div className="max-w-2xl mx-auto px-6 py-14">
       {/* Back */}
       <Link href="/" className="inline-flex items-center gap-1.5 font-poppins text-sm text-gray-400 hover:text-navy transition-colors mb-10 fade-up">
@@ -272,5 +279,6 @@ export default function AddPost() {
         </div>
       )}
     </div>
+    </>
   );
 }
