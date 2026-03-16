@@ -1,8 +1,7 @@
 import { useState } from "react";
 import Head from "next/head";
 import BlogCard from "@/components/BlogCard";
-import fs from "fs";
-import path from "path";
+import { getCollection } from "@/lib/db";
 
 export default function Home({ initialBlogs }) {
   const [blogs, setBlogs] = useState(initialBlogs);
@@ -88,13 +87,11 @@ export default function Home({ initialBlogs }) {
 }
 
 export async function getServerSideProps() {
-  const dataFilePath = path.join(process.cwd(), "data", "blog.json");
-  let blogs = [];
   try {
-    const raw = fs.readFileSync(dataFilePath, "utf-8");
-    blogs = JSON.parse(raw).reverse();
+    const col = await getCollection();
+    const blogs = await col.find({}).sort({ _id: -1 }).toArray();
+    return { props: { initialBlogs: blogs.map(({ _id, ...b }) => b) } };
   } catch {
-    blogs = [];
+    return { props: { initialBlogs: [] } };
   }
-  return { props: { initialBlogs: blogs } };
 }

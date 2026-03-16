@@ -1,7 +1,6 @@
 import Head from "next/head";
 import Link from "next/link";
-import fs from "fs";
-import path from "path";
+import { getCollection } from "@/lib/db";
 
 export default function BlogPost({ blog }) {
   if (!blog) {
@@ -25,11 +24,11 @@ export default function BlogPost({ blog }) {
       <meta property="og:type" content="article" />
       <meta property="og:title" content={`${blog.title} — DailyThoughts`} />
       <meta property="og:description" content={excerpt} />
-      {blog.image && <meta property="og:image" content={blog.image} />}
-      <meta name="twitter:card" content={blog.image ? "summary_large_image" : "summary"} />
+      <meta property="og:image" content={blog.image || "/logo_124179.png"} />
+      <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={`${blog.title} — DailyThoughts`} />
       <meta name="twitter:description" content={excerpt} />
-      {blog.image && <meta name="twitter:image" content={blog.image} />}
+      <meta name="twitter:image" content={blog.image || "/logo_124179.png"} />
     </Head>
     <div className="max-w-2xl mx-auto px-6 py-14">
       {/* Back */}
@@ -106,14 +105,13 @@ function formatDate(dateStr) {
 }
 
 export async function getServerSideProps({ params }) {
-  const dataFilePath = path.join(process.cwd(), "data", "blog.json");
-  let blog = null;
   try {
-    const raw = fs.readFileSync(dataFilePath, "utf-8");
-    const blogs = JSON.parse(raw);
-    blog = blogs.find((b) => b.id === params.id) || null;
+    const col = await getCollection();
+    const doc = await col.findOne({ id: params.id });
+    if (!doc) return { props: { blog: null } };
+    const { _id, ...blog } = doc;
+    return { props: { blog } };
   } catch {
-    blog = null;
+    return { props: { blog: null } };
   }
-  return { props: { blog } };
 }

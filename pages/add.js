@@ -68,8 +68,9 @@ export default function AddPost() {
         body: JSON.stringify(form),
       });
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Something went wrong.");
+        let msg = "Something went wrong.";
+        try { const d = await res.json(); msg = d.error || msg; } catch {}
+        throw new Error(msg);
       }
       router.push("/");
     } catch (err) {

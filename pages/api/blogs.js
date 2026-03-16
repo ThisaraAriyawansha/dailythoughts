@@ -1,32 +1,21 @@
-import fs from "fs";
-import path from "path";
 import formidable from "formidable";
-
-const dataFilePath = path.join(process.cwd(), "data", "blog.json");
+import { v2 as cloudinary } from "cloudinary";
+import { getCollection } from "@/lib/db";
 
 export const config = {
   api: { bodyParser: false },
 };
 
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
 function setCors(res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-}
-
-function readBlogs() {
-  try {
-    const raw = fs.readFileSync(dataFilePath, "utf-8");
-    return JSON.parse(raw);
-  } catch {
-    return [];
-  }
-}
-
-function writeBlogs(blogs) {
-  const dir = path.dirname(dataFilePath);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(dataFilePath, JSON.stringify(blogs, null, 2), "utf-8");
 }
 
 function readJsonBody(req) {
@@ -42,16 +31,16 @@ function readJsonBody(req) {
 }
 
 function parseMultipart(req) {
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-
-  const form = formidable({ uploadDir, keepExtensions: true, maxFileSize: 5 * 1024 * 1024 });
+  const form = formidable({
+    uploadDir: "/tmp",
+    keepExtensions: true,
+    maxFileSize: 5 * 1024 * 1024,
+  });
 
   return new Promise((resolve, reject) => {
-    form.parse(req, (err, fields, files) => {
+    form.parse(req, async (err, fields, files) => {
       if (err) return reject(err);
 
-      // formidable v3 returns arrays for fields
       const get = (key) => {
         const v = fields[key];
         return Array.isArray(v) ? v[0] : v;
@@ -60,7 +49,14 @@ function parseMultipart(req) {
       let imagePath = "";
       const file = Array.isArray(files.image) ? files.image[0] : files.image;
       if (file) {
-        imagePath = "/uploads/" + path.basename(file.filepath);
+        try {
+          const result = await cloudinary.uploader.upload(file.filepath, {
+            folder: "dailythoughts",
+          });
+          imagePath = result.secure_url;
+        } catch {
+          imagePath = "";
+        }
       }
 
       resolve({
@@ -78,34 +74,31 @@ export default async function handler(req, res) {
 
   if (req.method === "OPTIONS") return res.status(204).end();
 
+  const col = await getCollection();
+
   if (req.method === "GET") {
-    const blogs = readBlogs();
-    return res.status(200).json([...blogs].reverse());
+    const blogs = await col.find({}).sort({ _id: -1 }).toArray();
+    return res.status(200).json(blogs.map(({ _id, ...b }) => b));
   }
 
   if (req.method === "POST") {
-    const contentType = req.headers["content-type"] || "";
-
     let title, date, description, image;
 
-    if (contentType.includes("multipart/form-data")) {
-      // File upload from Postman / mobile app
+    const ct = req.headers["content-type"] || "";
+    if (ct.includes("multipart/form-data")) {
       try {
         ({ title, date, description, image } = await parseMultipart(req));
       } catch {
         return res.status(500).json({ error: "Failed to parse form data." });
       }
     } else {
-      // JSON from web form or external API
-      const body = await readJsonBody(req);
-      ({ title, date, description, image } = body);
+      ({ title, date, description, image } = await readJsonBody(req));
     }
 
     if (!title || !date || !description) {
       return res.status(400).json({ error: "Title, date, and description are required." });
     }
 
-    const blogs = readBlogs();
     const newBlog = {
       id: Date.now().toString(),
       title: title.trim(),
@@ -114,10 +107,9 @@ export default async function handler(req, res) {
       image: image ? image.trim() : "",
     };
 
-    blogs.push(newBlog);
-    writeBlogs(blogs);
-
-    return res.status(201).json(newBlog);
+    await col.insertOne(newBlog);
+    const { _id, ...blog } = newBlog;
+    return res.status(201).json(blog);
   }
 
   return res.status(405).json({ error: "Method not allowed." });
