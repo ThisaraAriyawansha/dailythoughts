@@ -26,5 +26,12 @@
     "date": "2026-03-16",
     "description": "Web development continues to evolve as new technologies emerge. Modern frameworks and tools help developers create faster, more responsive, and user-friendly websites.",
     "image": "/uploads/1715058774193.jpg"
+  },
+  {
+    "id": "1773646920529",
+    "title": "Cybersecurity in the Digital Age",
+    "date": "2026-03-16",
+    "description": "As technology grows, cybersecurity has become more important than ever. Cyber threats such as phishing attacks, malware, and data breaches can cause serious damage to individuals and organizations.\n\nBusinesses must implement strong security practices such as encryption, secure authentication, and regular system updates.\n\nEducating users about safe online behavior is also an important step in preventing cyber attacks.",
+    "image": "/uploads/czdc1825m76o3a3kqj10t8l03.jpg"
   }
 ]
