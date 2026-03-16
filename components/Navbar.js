@@ -27,6 +27,16 @@ export default function Navbar() {
             All Posts
           </Link>
           <Link
+            href="/admin"
+            className={`font-poppins text-sm font-medium transition-colors ${
+              router.pathname.startsWith("/admin")
+                ? "text-navy border-b-2 border-navy pb-0.5"
+                : "text-gray-400 hover:text-navy"
+            }`}
+          >
+            Admin
+          </Link>
+          <Link
             href="/add"
             className="font-poppins text-sm font-medium bg-navy text-white px-5 py-2 rounded-full hover:bg-navy-dark transition-colors"
           >
@@ -61,6 +71,13 @@ export default function Navbar() {
             className="font-poppins text-sm font-medium text-gray-700 hover:text-navy"
           >
             All Posts
+          </Link>
+          <Link
+            href="/admin"
+            onClick={() => setMenuOpen(false)}
+            className="font-poppins text-sm font-medium text-gray-400 hover:text-navy"
+          >
+            Admin
           </Link>
           <Link
             href="/add"
