@@ -1,25 +1,62 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
 export default function AddPost() {
   const router = useRouter();
-  const [form, setForm] = useState({ title: "", date: "", description: "", image: "" });
+  const today = new Date().toISOString().split("T")[0];
+  const [form, setForm] = useState({ title: "", date: today, description: "", image: "" });
+  const [localPreviewUrl, setLocalPreviewUrl] = useState("");
+  const [imageUploading, setImageUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [preview, setPreview] = useState(false);
-
-  const today = new Date().toISOString().split("T")[0];
+  const fileInputRef = useRef(null);
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
     setError("");
   }
 
+  async function handleImageChange(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Show local preview instantly
+    const objectUrl = URL.createObjectURL(file);
+    setLocalPreviewUrl(objectUrl);
+    setForm((f) => ({ ...f, image: "" }));
+    setImageUploading(true);
+
+    try {
+      const fd = new FormData();
+      fd.append("image", file);
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      if (!res.ok) throw new Error("Upload failed.");
+      const data = await res.json();
+      setForm((f) => ({ ...f, image: data.path }));
+    } catch {
+      setError("Image upload failed. Please try again.");
+      setLocalPreviewUrl("");
+    } finally {
+      setImageUploading(false);
+    }
+  }
+
+  function handleRemoveImage() {
+    setLocalPreviewUrl("");
+    setForm((f) => ({ ...f, image: "" }));
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     if (!form.title || !form.date || !form.description) {
       setError("Please fill in all required fields.");
+      return;
+    }
+    if (imageUploading) {
+      setError("Please wait for the image to finish uploading.");
       return;
     }
     setLoading(true);
@@ -39,6 +76,8 @@ export default function AddPost() {
       setLoading(false);
     }
   }
+
+  const displayImage = localPreviewUrl || form.image;
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-14">
@@ -104,36 +143,72 @@ export default function AddPost() {
             <input
               type="date"
               name="date"
-              value={form.date || today}
+              value={form.date}
               onChange={handleChange}
               max={today}
               className="font-poppins text-sm text-gray-700 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-navy focus:ring-2 focus:ring-navy/10 transition cursor-pointer"
             />
           </div>
 
-          {/* Image URL */}
+          {/* Image Upload */}
           <div>
             <label className="font-poppins text-xs font-medium text-gray-500 uppercase tracking-widest block mb-2">
-              Image URL <span className="text-gray-300">(optional)</span>
+              Cover Image <span className="text-gray-300">(optional)</span>
             </label>
-            <input
-              type="url"
-              name="image"
-              value={form.image}
-              onChange={handleChange}
-              placeholder="https://example.com/image.jpg"
-              className="w-full font-poppins text-sm border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-navy focus:ring-2 focus:ring-navy/10 transition"
-            />
-            {form.image && (
-              <div className="mt-3 rounded-xl overflow-hidden h-40 bg-gray-50">
+
+            {displayImage ? (
+              /* Preview with remove button */
+              <div className="relative rounded-2xl overflow-hidden h-48 bg-gray-50">
                 <img
-                  src={form.image}
-                  alt="Preview"
+                  src={displayImage}
+                  alt="Cover preview"
                   className="w-full h-full object-cover"
-                  onError={(e) => { e.target.style.display = "none"; }}
                 />
+                {imageUploading && (
+                  <div className="absolute inset-0 bg-white/70 flex items-center justify-center gap-2">
+                    <svg className="animate-spin w-5 h-5 text-navy" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                    </svg>
+                    <span className="font-poppins text-sm text-navy">Uploading...</span>
+                  </div>
+                )}
+                {!imageUploading && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    className="absolute top-3 right-3 bg-white rounded-full p-1.5 shadow hover:bg-red-50 transition-colors"
+                  >
+                    <svg className="w-4 h-4 text-gray-500 hover:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
               </div>
+            ) : (
+              /* Upload button */
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full border-2 border-dashed border-gray-200 rounded-2xl h-36 flex flex-col items-center justify-center gap-2 hover:border-navy/40 hover:bg-navy/5 transition-colors group"
+              >
+                <svg className="w-8 h-8 text-gray-300 group-hover:text-navy/40 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span className="font-poppins text-sm text-gray-400 group-hover:text-navy/60 transition-colors">
+                  Click to browse image
+                </span>
+                <span className="font-poppins text-xs text-gray-300">JPG, PNG, WebP — max 5 MB</span>
+              </button>
             )}
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="hidden"
+            />
           </div>
 
           {/* Description */}
@@ -161,7 +236,7 @@ export default function AddPost() {
           {/* Submit */}
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || imageUploading}
             className="w-full font-poppins font-medium text-sm bg-navy text-white py-3.5 rounded-full hover:bg-navy-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {loading ? (
@@ -180,9 +255,9 @@ export default function AddPost() {
       ) : (
         /* Preview */
         <div className="fade-up">
-          {form.image && (
+          {displayImage && (
             <div className="rounded-2xl overflow-hidden h-64 mb-8 bg-gray-50">
-              <img src={form.image} alt={form.title} className="w-full h-full object-cover" />
+              <img src={displayImage} alt={form.title} className="w-full h-full object-cover" />
             </div>
           )}
           <p className="font-poppins text-xs text-gray-400 uppercase tracking-widest mb-2">
