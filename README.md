@@ -1,40 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# DailyThoughts
+
+A minimal open blogging platform where anyone can share their thoughts — no account required. Built with a clean, distraction-free design.
+
+---
+
+## How It Works
+
+1. **Anyone can write a post** — visit `/add`, fill in a title, date, optional cover image, and description, then publish.
+2. **Images are uploaded to Cloudinary** — when a cover image is selected, it's uploaded instantly via the `/api/upload` endpoint and the returned URL is stored with the post.
+3. **Posts are stored in MongoDB** — each published post is saved to a MongoDB collection and displayed on the homepage in reverse chronological order.
+4. **Search** — the homepage includes a live client-side search that filters posts by title or description.
+5. **Admin panel** — accessible at `/admin`, protected by a session cookie. The admin can view all posts and delete any of them.
+
+### Pages
+
+| Route | Description |
+|---|---|
+| `/` | Homepage — lists all posts with search |
+| `/add` | Public post creation form with live preview |
+| `/blog/[id]` | Individual post view |
+| `/admin` | Admin dashboard — manage and delete posts |
+| `/admin/login` | Admin login page |
+
+### API Routes
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/blogs` | `GET` | List all blogs |
+| `/api/blogs` | `POST` | Create a new blog post |
+| `/api/blogs/[id]` | `DELETE` | Delete a post by ID |
+| `/api/upload` | `POST` | Upload a cover image to Cloudinary |
+| `/api/admin/login` | `POST` | Admin login (sets session cookie) |
+| `/api/admin/logout` | `POST` | Admin logout (clears session cookie) |
+| `/api/admin/check` | `GET` | Check if admin session is valid |
+
+---
+
+## Tech Stack
+
+| Technology | Purpose |
+|---|---|
+| [Next.js 16](https://nextjs.org) | React framework (Pages Router, SSR, API routes) |
+| [React 19](https://react.dev) | UI library |
+| [Tailwind CSS 4](https://tailwindcss.com) | Utility-first styling |
+| [MongoDB](https://www.mongodb.com) | Database for storing blog posts |
+| [Cloudinary](https://cloudinary.com) | Cloud image storage and delivery |
+| [Formidable](https://github.com/node-formidable/formidable) | Multipart form / file upload parsing |
+
+---
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Node.js 18+
+- A MongoDB connection string
+- A Cloudinary account
+
+### Environment Variables
+
+Create a `.env.local` file in the project root:
+
+```env
+MONGODB_URI=your_mongodb_connection_string
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+ADMIN_PASSWORD=your_admin_password
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Run Locally
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev
+```
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+### Build for Production
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Deployment
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+The easiest way to deploy is via [Vercel](https://vercel.com). Connect your repository and add the environment variables in the Vercel dashboard.
